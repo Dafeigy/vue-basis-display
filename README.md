@@ -1,6 +1,6 @@
 # vue-basis-table
 
-展示表格，后端直接我用flask传进来进行测试。
+展示表格，后端我用flask传进来进行测试。
 
 ## Recommended IDE Setup
 
