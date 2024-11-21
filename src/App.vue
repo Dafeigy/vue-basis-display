@@ -1,47 +1,48 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
+import HeaderDisplay from './components/HeaderDisplay.vue';
+import TableDisplay from './components/TableDisplay.vue'
+import { Calendar, Search } from '@element-plus/icons-vue'
+import { ref } from 'vue';
+const input1 = ref('')
+
+const DebugTest = ()=>{
+  alert(input1.value)
+}
 </script>
 
+
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
+  <div id="container">
+    <div id="control">
+      <el-date-picker
+          v-model="input1"
+          type="month"
+          placeholder="Pick a month"
+          value-format="YYDD"
+        />
+      <el-button type="primary" style="margin-left: .5%;" @click="DebugTest()">Get</el-button>
     </div>
-  </header>
-
-  <main>
-    <TheWelcome />
-  </main>
+    <div id="header">
+      <HeaderDisplay></HeaderDisplay>
+    </div>
+    <div id="futures">
+      <TableDisplay></TableDisplay>
+    </div>
+    
+  </div>
+  
 </template>
 
 <style scoped>
-header {
-  line-height: 1.5;
+
+#futures :deep( .el-table__row)>td{
+  /* 去除表格线 */
+  border: none;
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
+#control{
+  margin: 1%;
+  margin-left: 0;
 }
 
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-}
 </style>
