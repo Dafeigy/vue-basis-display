@@ -38,10 +38,9 @@
   }
   #contract-time{
     margin: 1%;
-    /* text-align: right; */
+    text-align: right;
     font-size: .5em;
-    display: flex;
-    float: right;
+
   }
   
 </style>
@@ -132,7 +131,7 @@ const headerStyle = ({})=>{
         'background':'#fff', 
         'color':'black', 
         'text-align': 'center',
-        borderBottom: '2px #000 solid',
+        'border': 'none'
     }
 
 }
