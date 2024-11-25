@@ -45,53 +45,39 @@
   
 </style>
 <script lang="ts" setup>
+import axios from 'axios';
 import type { TableColumnCtx } from 'element-plus'
+import { onMounted, onUnmounted, reactive, ref } from 'vue';
 
-interface BasisData {
-    IH_time: string
-    IH_basis: number
-    IH_basis_pct: number
-    IH_trade_flag: string
-    IF_time: string
-    IF_basis: number
-    IF_basis_pct: number
-    IF_trade_flag: string
-    IC_time: string
-    IC_basis: number
-    IC_basis_pct: number
-    IC_trade_flag: string
-    IM_time: string
-    IM_basis: number
-    IM_basis_pct: number
-    IM_trade_flag: string
-}
 
+let intervalId = null;
+const symbols = reactive(["2412","2501"]);
 
 interface SpanMethodProps {
-row: BasisData
-column: TableColumnCtx<BasisData>
-rowIndex: number
-columnIndex: number
+    row: BasisData
+    column: TableColumnCtx<BasisData>
+    rowIndex: number
+    columnIndex: number
 }
 const objectSpanMethod = ({
-row,
-column,
-rowIndex,
-columnIndex,
+    row,
+    column,
+    rowIndex,
+    columnIndex,
 }: SpanMethodProps) => {
-if (columnIndex %4 === 0) { //每4行对应的是合约Symbol，合并这两行
-    if (rowIndex % 2 === 0) {
-    return {
-        rowspan: 2,
-        colspan: 1,
+    if (columnIndex %4 === 0) { //每4行对应的是合约Symbol，合并这两行
+        if (rowIndex % 2 === 0) {
+        return {
+            rowspan: 2,
+            colspan: 1,
+        }
+        } else {
+        return {
+            rowspan: 0,
+            colspan: 0,
+        }
+        }
     }
-    } else {
-    return {
-        rowspan: 0,
-        colspan: 0,
-    }
-    }
-}
 }
 const columnStyle = ({row, column, rowIndex, columnIndex})=>{
     if ((columnIndex + 1) % 4 === 0) {  
@@ -134,6 +120,24 @@ const headerStyle = ({})=>{
         'border': 'none'
     }
 
+}
+interface BasisData {
+    IH_time: string
+    IH_basis: number
+    IH_basis_pct: number
+    IH_trade_flag: string
+    IF_time: string
+    IF_basis: number
+    IF_basis_pct: number
+    IF_trade_flag: string
+    IC_time: string
+    IC_basis: number
+    IC_basis_pct: number
+    IC_trade_flag: string
+    IM_time: string
+    IM_basis: number
+    IM_basis_pct: number
+    IM_trade_flag: string
 }
 
 const tableData: BasisData[] = [
@@ -210,4 +214,26 @@ const tableData: BasisData[] = [
     IM_trade_flag: '买一',
 },
 ]
+
+const fetchData = async () => {
+      try {
+        const params = {
+            list: symbols.join(",")
+        };
+        const response = await axios.get('http://127.0.0.1:5000/get-contracts-data',{params});
+        const data = await response.data;
+        console.log(data);
+
+      } catch (error) {
+        console.error('请求失败:', error);
+      }
+    };
+
+    onMounted(() => {
+      setInterval(fetchData, 20000);
+    });
+
+    onUnmounted(() => {
+      clearInterval(intervalId);
+    });
 </script>

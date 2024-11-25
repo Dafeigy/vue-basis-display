@@ -5,7 +5,7 @@
         :show-header="true"
         :border="false"
       >
-        <el-table-column prop="sh016_ticker_id" label="指数" />
+        <el-table-column prop="sh016_ticker_id" label="指数"/>
         <el-table-column prop="sh016_value" label="最新价"/>
         <el-table-column prop="sh300_ticker_id" label="指数"/>
         <el-table-column prop="sh300_value" label="最新价"/>
@@ -16,7 +16,7 @@
       </el-table>
     </div>
     <div id="etf-time">
-        Update Time: 2024-11-21 17:52
+        Update Time: {{ ETFUpdateTime }}
     </div>
 </template>
 
@@ -29,6 +29,9 @@
 </style>
 
 <script lang="ts" setup>
+    import { ref, onMounted, onUnmounted } from 'vue';
+    let intervalId = null;
+    const ETFUpdateTime= ref("2024-11-28 17:32.322")
     interface ETF_data {
         sh016_ticker_id: String
         sh016_value: number,
@@ -38,8 +41,10 @@
         sh905_value: number,
         sh852_ticker_id: String
         sh852_value: number,
-    }
-    const tableData: ETF_data[] =[
+        response_time: String
+    }   
+
+    const tableData =ref([
         {
             sh016_ticker_id:"000016.SH",
             sh016_value: 2676,
@@ -48,7 +53,31 @@
             sh905_ticker_id:"000905.SH",
             sh905_value: 5992,
             sh852_ticker_id:"000852.SH",
-            sh852_value: 6251
+            sh852_value: 6251,
+            response_time: "2000-01-01 12:00.023"
         }
-    ]
+    ])
+
+    const fetchData = async () => {
+      try {
+        const response = await fetch('http://127.0.0.1:5000/get-etf-data');
+        const data = await response.json();
+        console.log(data)
+        Object.keys(data['data']).forEach(key => {
+          tableData.value[0][key] = data['data'][key];
+        });
+        ETFUpdateTime.value = data['response_time']
+      } catch (error) {
+        console.error('请求失败:', error);
+      }
+    };
+
+    onMounted(() => {
+      setInterval(fetchData, 1000);
+    });
+
+    onUnmounted(() => {
+      clearInterval(intervalId);
+    });
+
 </script>
