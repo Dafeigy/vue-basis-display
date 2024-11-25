@@ -25,7 +25,7 @@ const DebugTest = ()=>{
           v-model="input1"
           type="month"
           placeholder="←选择合约月份"
-          value-format="YYDD"
+          value-format="YYMM"
           :locale="locale"
         />
       <el-button type="primary" style="margin-left: .5%; background-color: #444; border: none;" @click="DebugTest()">Get</el-button>
