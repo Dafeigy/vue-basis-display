@@ -11,20 +11,20 @@ def fake_generator(date):
     return_time = now.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
     contracts_data = {
         f"IH_{date}":{
-            "IH_buy_value":random.randint(2500,2700),
-            "IH_sell_value":random.randint(2500,2700)
+            "buy_value":random.randint(2500,2700),
+            "sell_value":random.randint(2500,2700)
         },
         f"IF_{date}":{
-            "IF_buy_value":random.randint(2500,2700),
-            "IF_sell_value":random.randint(2500,2700),
+            "buy_value":random.randint(2500,2700),
+            "sell_value":random.randint(2500,2700),
         },
         f"IC_{date}": {
-            "IC_buy_value":random.randint(2500,2700),
-            "IC_sell_value":random.randint(2500,2700),
+            "buy_value":random.randint(2500,2700),
+            "sell_value":random.randint(2500,2700),
         },
         f"IM_{date}": {
-            "IM_buy_value":random.randint(2500,2700),
-            "IM_sell_value":random.randint(2500,2700),
+            "buy_value":random.randint(2500,2700),
+            "sell_value":random.randint(2500,2700),
         }
     }
     
@@ -57,6 +57,8 @@ def get_contracts_data():
     response_origin_raw = {}
     for each in contracts:
         response_origin_raw[each] = fake_generator(each)
+    # print(response_origin_raw)
+    # print("\n")
     return jsonify(response_origin_raw)
 
 if __name__ == "__main__":

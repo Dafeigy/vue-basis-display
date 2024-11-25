@@ -1,7 +1,7 @@
 <template>
     <div style="display: flex; align-content: right;">
       <el-table
-        :data="tableData"
+        :data="returnData"
         :span-method="objectSpanMethod"
         :cell-style="columnStyle"
         :header-cell-style="headerStyle"
@@ -26,7 +26,7 @@
       </el-table>
     </div>
     <div id="contract-time">
-        Update Time: 2024-11-21 12:52
+        Update Time: {{ contractsUpdateTime }}
     </div>
 </template>
 
@@ -44,196 +44,176 @@
   }
   
 </style>
+
 <script lang="ts" setup>
-import axios from 'axios';
-import type { TableColumnCtx } from 'element-plus'
-import { onMounted, onUnmounted, reactive, ref } from 'vue';
-
-
-let intervalId = null;
-const symbols = reactive(["2412","2501"]);
-
-interface SpanMethodProps {
-    row: BasisData
-    column: TableColumnCtx<BasisData>
-    rowIndex: number
-    columnIndex: number
-}
-const objectSpanMethod = ({
-    row,
-    column,
-    rowIndex,
-    columnIndex,
-}: SpanMethodProps) => {
-    if (columnIndex %4 === 0) { //每4行对应的是合约Symbol，合并这两行
-        if (rowIndex % 2 === 0) {
-        return {
-            rowspan: 2,
-            colspan: 1,
-        }
-        } else {
-        return {
-            rowspan: 0,
-            colspan: 0,
-        }
+    import axios from 'axios';
+    import type { TableColumnCtx } from 'element-plus'
+    import { onMounted, onUnmounted, reactive, ref } from 'vue';
+    const returnData = ref([])
+    const contractsUpdateTime = ref("2024-10-08 12:00.000")
+    let intervalId = null;
+    const symbols = reactive([]);
+    interface SpanMethodProps {
+        row: BasisData
+        column: TableColumnCtx<BasisData>
+        rowIndex: number
+        columnIndex: number
+    }
+    const objectSpanMethod = ({
+        row,
+        column,
+        rowIndex,
+        columnIndex,
+    }: SpanMethodProps) => {
+        if (columnIndex %4 === 0) { //每4行对应的是合约Symbol，合并这两行
+            if (rowIndex % 2 === 0) {
+            return {
+                rowspan: 2,
+                colspan: 1,
+            }
+            } else {
+            return {
+                rowspan: 0,
+                colspan: 0,
+            }
+            }
         }
     }
-}
-const columnStyle = ({row, column, rowIndex, columnIndex})=>{
-    if ((columnIndex + 1) % 4 === 0) {  
-        // return 'color: #888;'
-        if (rowIndex % 2 === 1){
+    const columnStyle = ({row, column, rowIndex, columnIndex})=>{
+        if ((columnIndex + 1) % 4 === 0) {  
+            // return 'color: #888;'
+            if (rowIndex % 2 === 1){
+                return {
+                'background-color': '#808080',
+                'color': '#aaa',
+                'font-size': "1em",
+                'width': "10px",
+                'text-align': "right"
+                }
+            }
+            else {
+                return {
+                'background-color': '#808080',
+                'color': '#aaa',
+                'font-size': "1em",
+                'width': "10px",
+                'text-align': "left"
+                }
+            }
+        }
+        else if(columnIndex % 4 === 0){
             return {
-            'background-color': '#808080',
-            'color': '#aaa',
-            'font-size': "1em",
-            'width': "10px",
-            'text-align': "right"
+                'text-align': "center"
             }
         }
         else {
             return {
-            'background-color': '#808080',
-            'color': '#aaa',
-            'font-size': "1em",
-            'width': "10px",
-            'text-align': "left"
+                "text-align":"right"
             }
         }
     }
-    else if(columnIndex % 4 === 0){
+    const headerStyle = ({})=>{
         return {
-            'text-align': "center"
+            'background':'#fff', 
+            'color':'black', 
+            'text-align': 'center',
+            'border': 'none'
         }
+
     }
-    else {
-        return {
-            "text-align":"right"
+    interface BasisData {
+        IH_time: string
+        IH_basis: number
+        IH_basis_pct: number
+        IH_trade_flag: string
+        IF_time: string
+        IF_basis: number
+        IF_basis_pct: number
+        IF_trade_flag: string
+        IC_time: string
+        IC_basis: number
+        IC_basis_pct: number
+        IC_trade_flag: string
+        IM_time: string
+        IM_basis: number
+        IM_basis_pct: number
+        IM_trade_flag: string
+    }
+
+    const fetchData = async () => {
+        try {
+            const params = {
+                list: symbols.join(",")
+            };
+            const response = await axios.get('http://127.0.0.1:5000/get-contracts-data',{params});
+            const data = await response.data;
+            contractsUpdateTime.value = data[symbols.at(-1)].time
+            let etf_latest = JSON.parse(sessionStorage.getItem("ETF_Realtime"))
+            returnData.value = []
+            console.log("We start here")
+            for (const date of Object.keys(data)) {
+                var sell = {IH_trade_flag: "卖一",
+                            IF_trade_flag: "卖一",
+                            IC_trade_flag: "卖一",
+                            IM_trade_flag: "卖一",
+                        }
+                var buy = {
+                    IH_trade_flag: '买一',
+                    IF_trade_flag: '买一',
+                    IC_trade_flag: '买一',
+                    IM_trade_flag: '买一'
+                }
+                
+                for (const contract of Object.keys(data[date]['data'])){
+                    if (contract.startsWith("IH")){
+                        sell['IH_time'] = contract
+                        buy['IH_time'] = contract
+                        sell['IH_basis'] = data[date]['data'][contract]['sell_value'] - etf_latest.data.sh016_value
+                        buy['IH_basis'] = data[date]['data'][contract]['buy_value'] - etf_latest.data.sh016_value
+                        sell['IH_basis_pct'] = 2.0
+                        buy['IH_basis_pct'] = 2.0
+                        
+                    }
+                    else if(contract.startsWith("IF")){
+                        sell['IF_time'] = contract
+                        buy['IF_time'] = contract
+                        sell['IF_basis'] = data[date]['data'][contract]['sell_value'] - etf_latest.data.sh300_value
+                        buy['IF_basis'] = data[date]['data'][contract]['buy_value'] - etf_latest.data.sh300_value
+                        sell['IF_basis_pct'] = 2.0
+                        buy['IF_basis_pct'] = 2.0
+                    }
+                    else if(contract.startsWith("IC")){
+                        sell['IC_time'] = contract
+                        buy['IC_time'] = contract
+                        sell['IC_basis'] = data[date]['data'][contract]['sell_value'] - etf_latest.data.sh905_value
+                        buy['IC_basis'] = data[date]['data'][contract]['buy_value'] - etf_latest.data.sh905_value
+                        sell['IC_basis_pct'] = 2.0
+                        buy['IC_basis_pct'] = 2.0
+                    }
+                    else if(contract.startsWith("IM")){
+                        sell['IM_time'] = contract
+                        buy['IM_time'] = contract
+                        sell['IM_basis'] = data[date]['data'][contract]['sell_value'] - etf_latest.data.sh852_value
+                        buy['IM_basis'] = data[date]['data'][contract]['buy_value'] - etf_latest.data.sh852_value
+                        sell['IM_basis_pct'] = 2.0
+                        buy['IM_basis_pct'] = 2.0
+                    }
+                }
+                returnData.value.push(sell, buy)
+            }
+        } catch (error) {
+            console.error('请求失败:', error);
         }
-    }
-}
-const headerStyle = ({})=>{
-    return {
-        'background':'#fff', 
-        'color':'black', 
-        'text-align': 'center',
-        'border': 'none'
-    }
-
-}
-interface BasisData {
-    IH_time: string
-    IH_basis: number
-    IH_basis_pct: number
-    IH_trade_flag: string
-    IF_time: string
-    IF_basis: number
-    IF_basis_pct: number
-    IF_trade_flag: string
-    IC_time: string
-    IC_basis: number
-    IC_basis_pct: number
-    IC_trade_flag: string
-    IM_time: string
-    IM_basis: number
-    IM_basis_pct: number
-    IM_trade_flag: string
-}
-
-const tableData: BasisData[] = [
-{
-    IH_time: 'IH2412',
-    IH_basis: 4.2,
-    IH_basis_pct: 1.7,
-    IH_trade_flag: "卖一",
-    IF_time: 'IF2412',
-    IF_basis: -5.8,
-    IF_basis_pct: -1.5,
-    IF_trade_flag: "卖一",
-    IC_time: 'IC2412',
-    IC_basis: -48.4,
-    IC_basis_pct: -8.6,
-    IC_trade_flag: "卖一",
-    IM_time: 'IM2412',
-    IM_basis: -59.0,
-    IM_basis_pct: -10.5,
-    IM_trade_flag: "卖一",
-},
-{
-    IH_time: 'IH2412',
-    IH_basis: 3.6,
-    IH_basis_pct: 1.4,
-    IH_trade_flag: '买一',
-    IF_time: 'IF2412',
-    IF_basis: -6.0,
-    IF_basis_pct: -1.6,
-    IF_trade_flag: '买一',
-    IC_time: 'IC2412',
-    IC_basis: -50.2,
-    IC_basis_pct: -8.9,
-    IC_trade_flag: '买一',
-    IM_time: 'IM2412',
-    IM_basis: -59.2,
-    IM_basis_pct: -10.5,
-    IM_trade_flag: '买一',
-},
-{
-    IH_time: 'IH2503',
-    IH_basis: 5.6,
-    IH_basis_pct: 1.2,
-    IH_trade_flag: '卖一',
-    IF_time: 'IF2503',
-    IF_basis: -2.2,
-    IF_basis_pct: -0.3,
-    IF_trade_flag: '卖一',
-    IC_time: 'IC2503',
-    IC_basis: -69.6,
-    IC_basis_pct: -6.8,
-    IC_trade_flag: '卖一',
-    IM_time: 'IM2503',
-    IM_basis: -90.8,
-    IM_basis_pct: -8.8,
-    IM_trade_flag: '卖一',
-},
-{
-    IH_time: 'IH2503',
-    IH_basis: 4.2,
-    IH_basis_pct: 0.9,
-    IH_trade_flag: '买一',
-    IF_time: 'IF2503',
-    IF_basis: -7.6,
-    IF_basis_pct: -1.1,
-    IF_trade_flag: '买一',
-    IC_time: 'IC2503',
-    IC_basis: -75.4,
-    IC_basis_pct: -7.3,
-    IC_trade_flag: '买一',
-    IM_time: 'IM2503',
-    IM_basis: -91.6,
-    IM_basis_pct: -8.9,
-    IM_trade_flag: '买一',
-},
-]
-
-const fetchData = async () => {
-      try {
-        const params = {
-            list: symbols.join(",")
         };
-        const response = await axios.get('http://127.0.0.1:5000/get-contracts-data',{params});
-        const data = await response.data;
-        console.log(data);
 
-      } catch (error) {
-        console.error('请求失败:', error);
-      }
-    };
+        onMounted(() => {
+        setInterval(fetchData, 500);
+        });
 
-    onMounted(() => {
-      setInterval(fetchData, 2000);
-    });
+        onUnmounted(() => {
+        clearInterval(intervalId);
+        });
+    
+    // Get data from TableDisplay.
 
-    onUnmounted(() => {
-      clearInterval(intervalId);
-    });
 </script>

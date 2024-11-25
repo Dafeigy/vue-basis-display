@@ -66,6 +66,8 @@
           tableData.value[0][key] = data['data'][key];
         });
         ETFUpdateTime.value = data['response_time']
+        // NOTE: 组件间通信感觉操作起来比较麻烦 直接用session了
+        sessionStorage.setItem("ETF_Realtime", JSON.stringify(data));
       } catch (error) {
         console.error('请求失败:', error);
       }

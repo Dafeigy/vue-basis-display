@@ -1,0 +1,12 @@
+{"2412": {"data": 
+{"IH_2412": {"buy_value": 2675, "sell_value": 2637},
+ "IF_2412": {"buy_value": 2601, "sell_value": 2534}, 
+ "IC_2412": {"buy_value": 2588, "sell_value": 2658}, 
+ "IM_2412": {"buy_value": 2663, "sell_value": 2651}}, 
+ "time": "2024-11-25 14:42:02.415"}, 
+ "2501": {"data": 
+ {"IH_2501": {"buy_value": 2648, "sell_value": 2649},
+ "IF_2501": {"buy_value": 2522, "sell_value": 2593}, 
+ "IC_2501": {"buy_value": 2568, "sell_value": 2548},
+ "IM_2501": {"buy_value": 2626, "sell_value": 2672}},
+ "time": "2024-11-25 14:42:02.415"}} 
