@@ -142,17 +142,22 @@
 
     const fetchData = async () => {
         symbols = JSON.parse(sessionStorage.getItem("symbols"));
-        console.log(symbols)
+        // console.log(symbols)
         try {
             const params = {
                 list: symbols.join(",")
             };
+            if (symbols.length ===0){
+                returnData.value = []
+                return
+            }
             const response = await axios.get('http://127.0.0.1:5000/get-contracts-data',{params});
             const data = await response.data;
             contractsUpdateTime.value = data[symbols.at(-1)].time
             let etf_latest = JSON.parse(sessionStorage.getItem("ETF_Realtime"))
             returnData.value = []
-            console.log("We start here")
+            // console.log("We start here")
+            console.log(data)
             for (const date of Object.keys(data)) {
                 var sell = {IH_trade_flag: "卖一",
                             IF_trade_flag: "卖一",

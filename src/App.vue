@@ -42,6 +42,7 @@
           locale="locale"
         />
       <el-button type="primary" style="margin-left: .5%; background-color: #444; border: none;" @click="AddDate">Add</el-button>
+      <el-button type="danger" style="margin-left: .5%; border: none;" @click="DelDate">Del</el-button>
     </div>
     <div id="header">
       <HeaderDisplay></HeaderDisplay>
