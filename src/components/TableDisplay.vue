@@ -230,7 +230,7 @@ const fetchData = async () => {
     };
 
     onMounted(() => {
-      setInterval(fetchData, 20000);
+      setInterval(fetchData, 2000);
     });
 
     onUnmounted(() => {

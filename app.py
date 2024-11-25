@@ -6,6 +6,34 @@ import random
 app = Flask(__name__)
 CORS(app)
 
+def fake_generator(date):
+    now = datetime.datetime.now()
+    return_time = now.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+    contracts_data = {
+        f"IH_{date}":{
+            "IH_buy_value":random.randint(2500,2700),
+            "IH_sell_value":random.randint(2500,2700)
+        },
+        f"IF_{date}":{
+            "IF_buy_value":random.randint(2500,2700),
+            "IF_sell_value":random.randint(2500,2700),
+        },
+        f"IC_{date}": {
+            "IC_buy_value":random.randint(2500,2700),
+            "IC_sell_value":random.randint(2500,2700),
+        },
+        f"IM_{date}": {
+            "IM_buy_value":random.randint(2500,2700),
+            "IM_sell_value":random.randint(2500,2700),
+        }
+    }
+    
+    
+    res = {
+        "data": contracts_data,
+        "time": return_time
+    }
+    return res
 @app.route("/get-etf-data")
 def etf_data_generator():
     # response data 
@@ -25,7 +53,11 @@ def etf_data_generator():
 @app.route("/get-contracts-data")
 def get_contracts_data():
     list_param = request.args.get('list')
-    return jsonify(list_param)
+    contracts = list_param.split(",")
+    response_origin_raw = {}
+    for each in contracts:
+        response_origin_raw[each] = fake_generator(each)
+    return jsonify(response_origin_raw)
 
 if __name__ == "__main__":
     app.run(host="localhost")

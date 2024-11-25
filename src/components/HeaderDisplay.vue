@@ -62,7 +62,6 @@
       try {
         const response = await fetch('http://127.0.0.1:5000/get-etf-data');
         const data = await response.json();
-        console.log(data)
         Object.keys(data['data']).forEach(key => {
           tableData.value[0][key] = data['data'][key];
         });
