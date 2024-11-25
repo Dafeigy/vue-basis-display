@@ -1,20 +1,33 @@
-<script setup>
-import HeaderDisplay from './components/HeaderDisplay.vue';
-import TableDisplay from './components/TableDisplay.vue'
-import { Calendar, Search } from '@element-plus/icons-vue'
-import { ref } from 'vue';
-
-
-const input1 = ref('')
-
-const DebugTest = ()=>{
-  if (input1.value){
-    alert(input1.value)
+<script  lang ='ts' setup>
+  import HeaderDisplay from './components/HeaderDisplay.vue';
+  import TableDisplay from './components/TableDisplay.vue'
+  import { Calendar, Search } from '@element-plus/icons-vue'
+  import { ref,reactive, provide, inject } from 'vue';
+  
+  const input1 = ref('');
+  var symbols:String[] = []
+  sessionStorage.removeItem("symbols")
+  const AddDate = ()=>{
+    if (input1.value){
+      symbols.push(input1.value)
+      sessionStorage.setItem("symbols",JSON.stringify(symbols));
+      console.log(sessionStorage.getItem("symbols"))
+    }
+    else{
+      alert("Please select contract date!")
+    }
   }
-  else{
-    alert("Please select contract date!")
+
+  const DelDate = ()=>{
+    if (input1.value){
+      symbols = symbols.filter(item => item !== input1.value);
+      sessionStorage.setItem("symbols",JSON.stringify(symbols));
+    }
+    else{
+      alert("Please select contract date!")
+    }
   }
-}
+  
 </script>
 
 
@@ -26,9 +39,9 @@ const DebugTest = ()=>{
           type="month"
           placeholder="←选择合约月份"
           value-format="YYMM"
-          :locale="locale"
+          locale="locale"
         />
-      <el-button type="primary" style="margin-left: .5%; background-color: #444; border: none;" @click="DebugTest()">Get</el-button>
+      <el-button type="primary" style="margin-left: .5%; background-color: #444; border: none;" @click="AddDate">Add</el-button>
     </div>
     <div id="header">
       <HeaderDisplay></HeaderDisplay>

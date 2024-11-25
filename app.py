@@ -62,4 +62,4 @@ def get_contracts_data():
     return jsonify(response_origin_raw)
 
 if __name__ == "__main__":
-    app.run(host="localhost")
+    app.run(host="localhost",debug=True)

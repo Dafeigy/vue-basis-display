@@ -48,11 +48,11 @@
 <script lang="ts" setup>
     import axios from 'axios';
     import type { TableColumnCtx } from 'element-plus'
-    import { onMounted, onUnmounted, reactive, ref } from 'vue';
+    import { inject, onMounted, onUnmounted, provide, reactive, ref } from 'vue';
+    var symbols = []
     const returnData = ref([])
     const contractsUpdateTime = ref("2024-10-08 12:00.000")
     let intervalId = null;
-    const symbols = reactive([]);
     interface SpanMethodProps {
         row: BasisData
         column: TableColumnCtx<BasisData>
@@ -141,6 +141,8 @@
     }
 
     const fetchData = async () => {
+        symbols = JSON.parse(sessionStorage.getItem("symbols"));
+        console.log(symbols)
         try {
             const params = {
                 list: symbols.join(",")
@@ -207,7 +209,7 @@
         };
 
         onMounted(() => {
-        setInterval(fetchData, 500);
+        setInterval(fetchData, 2000);
         });
 
         onUnmounted(() => {
