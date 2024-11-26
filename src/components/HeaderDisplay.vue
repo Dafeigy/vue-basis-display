@@ -31,6 +31,7 @@
 <script lang="ts" setup>
     import { ref, onMounted, onUnmounted } from 'vue';
     let intervalId = null;
+    var ETFUpdateInterval = 1000
     const ETFUpdateTime= ref("2024-11-28 17:32.322")
     interface ETF_data {
         sh016_ticker_id: String
@@ -74,7 +75,7 @@
     };
 
     onMounted(() => {
-      setInterval(fetchData, 1000);
+      setInterval(fetchData, ETFUpdateInterval);
     });
 
     onUnmounted(() => {

@@ -1,8 +1,7 @@
 <script  lang ='ts' setup>
   import HeaderDisplay from './components/HeaderDisplay.vue';
   import TableDisplay from './components/TableDisplay.vue'
-  import { Calendar, Search } from '@element-plus/icons-vue'
-  import { ref,reactive, provide, inject } from 'vue';
+  import { ref } from 'vue';
   
   const input1 = ref('');
   var symbols:String[] = []
@@ -14,7 +13,7 @@
       console.log(sessionStorage.getItem("symbols"))
     }
     else{
-      alert("Please select contract date!")
+      alert("← 需要先选择一个合约日期再进行添加操作")
     }
   }
 
@@ -24,7 +23,7 @@
       sessionStorage.setItem("symbols",JSON.stringify(symbols));
     }
     else{
-      alert("Please select contract date!")
+      alert("← 需要选择一个合约日期再进行移除操作")
     }
   }
   
@@ -41,7 +40,7 @@
           value-format="YYMM"
           locale="locale"
         />
-      <el-button type="primary" style="margin-left: .5%; background-color: #444; border: none;" @click="AddDate">Add</el-button>
+      <el-button type="primary" style="margin-left: .5%; border: none;" @click="AddDate">Add</el-button>
       <el-button type="danger" style="margin-left: .5%; border: none;" @click="DelDate">Del</el-button>
     </div>
     <div id="header">

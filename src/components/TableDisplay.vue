@@ -6,22 +6,23 @@
         :cell-style="columnStyle"
         :header-cell-style="headerStyle"
         :border="true"
+        
       >
         <el-table-column prop="IH_time" label="合约代码" />
         <el-table-column prop="IH_basis" label="基差"/>
-        <el-table-column prop="IH_basis_pct" label="基差率"/>
+        <el-table-column :formatter="formatPercentage" prop="IH_basis_pct" label="基差率" />
         <el-table-column prop="IH_trade_flag" label="" width="90vw"/>
         <el-table-column prop="IF_time" label="合约代码" />
         <el-table-column prop="IF_basis" label="基差"/>
-        <el-table-column prop="IF_basis_pct" label="基差率"/>
+        <el-table-column :formatter="formatPercentage" prop="IF_basis_pct" label="基差率"/>
         <el-table-column prop="IF_trade_flag" label="" width="90vw"/>
         <el-table-column prop="IC_time" label="合约代码" />
         <el-table-column prop="IC_basis" label="基差"/>
-        <el-table-column prop="IC_basis_pct" label="基差率"/>
+        <el-table-column :formatter="formatPercentage" prop="IC_basis_pct" label="基差率"/>
         <el-table-column prop="IC_trade_flag" label="" width="90vw"/>
         <el-table-column prop="IM_time" label="合约代码" />
         <el-table-column prop="IM_basis" label="基差"/>
-        <el-table-column prop="IM_basis_pct" label="基差率"/>
+        <el-table-column :formatter="formatPercentage" prop="IM_basis_pct" label="基差率"/>
         <el-table-column prop="IM_trade_flag" label="" width="90vw"/>
       </el-table>
     </div>
@@ -48,11 +49,14 @@
 <script lang="ts" setup>
     import axios from 'axios';
     import type { TableColumnCtx } from 'element-plus'
-    import { inject, onMounted, onUnmounted, provide, reactive, ref } from 'vue';
+    import { onMounted, onUnmounted, ref } from 'vue';
+
+    let intervalId = null;
+    let contractUpdateInterval = 500
     var symbols = []
     const returnData = ref([])
     const contractsUpdateTime = ref("2024-10-08 12:00.000")
-    let intervalId = null;
+    
     interface SpanMethodProps {
         row: BasisData
         column: TableColumnCtx<BasisData>
@@ -121,6 +125,10 @@
         }
 
     }
+
+    const formatPercentage = (a,b,c)=>{
+        return (c * 100).toFixed(3) + "%"
+    }
     interface BasisData {
         IH_time: string
         IH_basis: number
@@ -143,6 +151,9 @@
     const fetchData = async () => {
         symbols = JSON.parse(sessionStorage.getItem("symbols"));
         // console.log(symbols)
+        if (symbols === null){
+            return
+        }
         try {
             const params = {
                 list: symbols.join(",")
@@ -157,7 +168,7 @@
             let etf_latest = JSON.parse(sessionStorage.getItem("ETF_Realtime"))
             returnData.value = []
             // console.log("We start here")
-            console.log(data)
+            // console.log(data)
             for (const date of Object.keys(data)) {
                 var sell = {IH_trade_flag: "卖一",
                             IF_trade_flag: "卖一",
@@ -172,13 +183,14 @@
                 }
                 
                 for (const contract of Object.keys(data[date]['data'])){
+                    var expired_time = data[date]['expired']
                     if (contract.startsWith("IH")){
                         sell['IH_time'] = contract
                         buy['IH_time'] = contract
                         sell['IH_basis'] = data[date]['data'][contract]['sell_value'] - etf_latest.data.sh016_value
                         buy['IH_basis'] = data[date]['data'][contract]['buy_value'] - etf_latest.data.sh016_value
-                        sell['IH_basis_pct'] = 2.0
-                        buy['IH_basis_pct'] = 2.0
+                        sell['IH_basis_pct'] = (sell['IH_basis']/etf_latest.data.sh016_value)/expired_time * 245
+                        buy['IH_basis_pct'] = (buy['IH_basis']/etf_latest.data.sh016_value)/expired_time * 245
                         
                     }
                     else if(contract.startsWith("IF")){
@@ -186,24 +198,24 @@
                         buy['IF_time'] = contract
                         sell['IF_basis'] = data[date]['data'][contract]['sell_value'] - etf_latest.data.sh300_value
                         buy['IF_basis'] = data[date]['data'][contract]['buy_value'] - etf_latest.data.sh300_value
-                        sell['IF_basis_pct'] = 2.0
-                        buy['IF_basis_pct'] = 2.0
+                        sell['IF_basis_pct'] = (sell['IF_basis']/etf_latest.data.sh300_value)/expired_time * 245
+                        buy['IF_basis_pct'] = (buy['IF_basis']/etf_latest.data.sh300_value)/expired_time * 245
                     }
                     else if(contract.startsWith("IC")){
                         sell['IC_time'] = contract
                         buy['IC_time'] = contract
                         sell['IC_basis'] = data[date]['data'][contract]['sell_value'] - etf_latest.data.sh905_value
                         buy['IC_basis'] = data[date]['data'][contract]['buy_value'] - etf_latest.data.sh905_value
-                        sell['IC_basis_pct'] = 2.0
-                        buy['IC_basis_pct'] = 2.0
+                        sell['IC_basis_pct'] = (sell['IC_basis']/etf_latest.data.sh905_value)/expired_time * 245
+                        buy['IC_basis_pct'] = (buy['IC_basis']/etf_latest.data.sh905_value)/expired_time * 245
                     }
                     else if(contract.startsWith("IM")){
                         sell['IM_time'] = contract
                         buy['IM_time'] = contract
                         sell['IM_basis'] = data[date]['data'][contract]['sell_value'] - etf_latest.data.sh852_value
                         buy['IM_basis'] = data[date]['data'][contract]['buy_value'] - etf_latest.data.sh852_value
-                        sell['IM_basis_pct'] = 2.0
-                        buy['IM_basis_pct'] = 2.0
+                        sell['IM_basis_pct'] = (sell['IM_basis']/etf_latest.data.sh852_value)/expired_time * 245
+                        buy['IM_basis_pct'] = (buy['IM_basis']/etf_latest.data.sh852_value)/expired_time * 245
                     }
                 }
                 returnData.value.push(sell, buy)
@@ -214,7 +226,7 @@
         };
 
         onMounted(() => {
-        setInterval(fetchData, 2000);
+        setInterval(fetchData, contractUpdateInterval);
         });
 
         onUnmounted(() => {
