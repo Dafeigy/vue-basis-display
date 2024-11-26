@@ -55,7 +55,7 @@
     let contractUpdateInterval = 500
     var symbols = []
     const returnData = ref([])
-    const contractsUpdateTime = ref("2024-10-08 12:00.000")
+    const contractsUpdateTime = ref("")
     
     interface SpanMethodProps {
         row: BasisData

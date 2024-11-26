@@ -32,7 +32,7 @@
     import { ref, onMounted, onUnmounted } from 'vue';
     let intervalId = null;
     var ETFUpdateInterval = 1000
-    const ETFUpdateTime= ref("2024-11-28 17:32.322")
+    const ETFUpdateTime= ref("")
     interface ETF_data {
         sh016_ticker_id: String
         sh016_value: number,
@@ -48,13 +48,13 @@
     const tableData =ref([
         {
             sh016_ticker_id:"000016.SH",
-            sh016_value: 2676,
+            sh016_value: NaN,
             sh300_ticker_id:"000030.SH",
-            sh300_value: 3986,
+            sh300_value: NaN,
             sh905_ticker_id:"000905.SH",
-            sh905_value: 5992,
+            sh905_value: NaN,
             sh852_ticker_id:"000852.SH",
-            sh852_value: 6251,
+            sh852_value: NaN,
             response_time: "2000-01-01 12:00.023"
         }
     ])
